@@ -29,7 +29,17 @@ app.use(
 );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        origin === (process.env.FRONTEND_URL || 'http://localhost:5173')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
