@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 
 // Generic error handler
@@ -8,6 +9,32 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      res.status(400).json({
+        error: {
+          message: 'File size exceeds allowed limit (maximum 5MB)',
+        },
+      });
+      return;
+    }
+    res.status(400).json({
+      error: {
+        message: err.message,
+      },
+    });
+    return;
+  }
+
+  if (err.message && (err.message.includes('Only PDF') || err.message.includes('accepted'))) {
+    res.status(400).json({
+      error: {
+        message: err.message,
+      },
+    });
+    return;
+  }
+
   console.error('[ERROR]', err.message, err.stack);
   res.status(500).json({
     error: {

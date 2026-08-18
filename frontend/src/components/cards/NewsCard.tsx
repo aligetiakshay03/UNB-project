@@ -21,14 +21,17 @@ export const NewsCard: React.FC<NewsCardProps> = ({
 }) => {
   return (
     <article className="bg-white border border-gray-100 rounded-xs overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group">
-      <div className="relative h-48 overflow-hidden bg-gray-100">
+      <div className="relative h-52 overflow-hidden bg-gray-100 flex items-center justify-center">
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/images/unb-reference/home-about.jpg';
+          }}
+          className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <span className="absolute top-3 left-3 bg-[#132B5B] text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1">
+        <span className="absolute top-3 left-3 bg-[#132B5B] text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 z-10 shadow-xs">
           {category}
         </span>
       </div>

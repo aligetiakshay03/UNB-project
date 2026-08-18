@@ -1,42 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { PageHero } from '../components/sections/PageHero';
 import { SectionHeader } from '../components/sections/SectionHeader';
 import { ProductCard } from '../components/cards/ProductCard';
 import { Button } from '../components/ui/Button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { productService } from '../services/productService';
+import { resolveImageUrl } from '../utils/imageUrl';
+import type { Product } from '../types';
 
 export const Brands: React.FC = () => {
-  const sorghumProducts = [
-    {
-      name: '1L CARTONS',
-      description: 'The authentic taste of traditional sorghum beer in a convenient, value-driven format.',
-      imageUrl: '/images/unb-reference/brand-chibuku.jpg',
-      slug: '1l-cartons',
-      tag: '1L PACK',
-    },
-    {
-      name: '2L SHARING PACKS',
-      description: 'A smooth, rich and full-bodied sorghum beer experience, crafted for quality and value.',
-      imageUrl: '/images/unb-reference/brand-ijuba.jpg',
-      slug: '2l-sharing-packs',
-      tag: '2L PACK',
-    },
-    {
-      name: 'EXTRA RANGE',
-      description: 'A refreshing twist on traditional sorghum beer with a smooth, lightly carbonated finish.',
-      imageUrl: '/images/unb-reference/brand-leopard.jpg',
-      slug: 'extra-range',
-      tag: 'LIGHTLY CARBONATED',
-    },
-    {
-      name: 'PREMIUM | CHIBUKU SUPER',
-      description: "UNB's flagship carbonated sorghum beer brand, celebrated for its rich taste, consistent quality and smooth finish.",
-      imageUrl: '/images/unb-reference/brand-chibuku.jpg',
-      slug: 'chibuku-super',
-      tag: 'FLAGSHIP',
-    },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await productService.getProducts();
+        if (isMounted) {
+          setProducts(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError((err as Error).message || 'Unable to load products from server');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Approved reference image fallback helper
+  const getProductImage = (p: Product) => {
+    const slugMap: Record<string, string> = {
+      'chibuku-super': '/images/unb-reference/brand-chibuku.jpg',
+      'chibuku': '/images/unb-reference/brand-chibuku.jpg',
+      'lion-lager': '/images/unb-reference/brand-leopard.jpg',
+      'leopard': '/images/unb-reference/brand-leopard.jpg',
+      'ijuba': '/images/unb-reference/brand-ijuba.jpg',
+      'ukhozi-mageu': '/images/unb-reference/brand-ukhozi-mageu.jpg',
+      'sparkling-water': '/images/unb-reference/brand-ijuba.jpg',
+    };
+    const fallback = slugMap[p.slug] || '/images/unb-reference/brand-chibuku.jpg';
+    return resolveImageUrl(p.imageUrl, fallback);
+  };
 
   return (
     <Layout>
@@ -57,18 +75,42 @@ export const Brands: React.FC = () => {
             description="Our range of sorghum beverages offers something for every occasion. Authentic taste. Trusted quality. Deeply rooted in tradition."
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            {sorghumProducts.map((prod) => (
-              <ProductCard
-                key={prod.slug}
-                name={prod.name}
-                description={prod.description}
-                imageUrl={prod.imageUrl}
-                slug={prod.slug}
-                tag={prod.tag}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="py-16 flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-8 h-8 text-unb-navy animate-spin" />
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                Loading brand portfolio...
+              </p>
+            </div>
+          ) : error ? (
+            <div className="my-8 p-6 bg-red-50 border border-red-200 rounded-xs text-center space-y-2">
+              <AlertCircle className="w-6 h-6 text-red-600 mx-auto" />
+              <p className="text-xs text-red-700 font-medium">{error}</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="my-8 p-12 bg-gray-50 border border-gray-200 rounded-xs text-center">
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                No products currently available in this category.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+              {products.map((prod) => (
+                <ProductCard
+                  key={prod.slug}
+                  name={prod.name}
+                  description={
+                    prod.shortDescription && !prod.shortDescription.includes('[CLIENT')
+                      ? prod.shortDescription
+                      : 'Authentic African beverage crafted with quality and heritage.'
+                  }
+                  imageUrl={getProductImage(prod)}
+                  slug={prod.slug}
+                  tag={prod.isFeatured ? 'FEATURED' : undefined}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

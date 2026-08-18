@@ -59,7 +59,7 @@ export const adminCreateNews = async (
     const slug = generateSlug(data.title);
 
     const featuredImage = req.file
-      ? `[FILE_STORAGE_PLACEHOLDER]/${Date.now()}_${req.file.originalname}`
+      ? `/uploads/${req.file.filename}`
       : undefined;
 
     const publishedAt =
@@ -111,7 +111,7 @@ export const adminUpdateNews = async (
 
     const data = parseResult.data;
     const featuredImage = req.file
-      ? `[FILE_STORAGE_PLACEHOLDER]/${Date.now()}_${req.file.originalname}`
+      ? `/uploads/${req.file.filename}`
       : undefined;
 
     // Auto-set publishedAt when promoting to PUBLISHED for the first time

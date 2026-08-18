@@ -9,6 +9,7 @@ import {
   adminUpdateProduct,
   adminDeleteProduct,
   adminPatchProductStatus,
+  adminGetCategories,
 } from '../controllers/admin/products.admin.controller';
 import {
   adminListNews,
@@ -40,7 +41,8 @@ const router = Router();
 // All admin routes require authentication
 router.use(authenticate);
 
-// ─── Products ─────────────────────────────────────────────────────────────────
+// ─── Products & Categories ───────────────────────────────────────────────────
+router.get('/categories', adminGetCategories);
 router.get('/products', adminListProducts);
 router.post('/products', imageUpload.single('image'), adminCreateProduct);
 router.put('/products/:id', imageUpload.single('image'), adminUpdateProduct);

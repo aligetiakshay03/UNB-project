@@ -1,50 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { PageHero } from '../components/sections/PageHero';
 import { SectionHeader } from '../components/sections/SectionHeader';
 import { JobCard } from '../components/cards/JobCard';
-import { Search } from 'lucide-react';
+import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { jobService } from '../services/jobService';
+import type { Job } from '../types';
 
 export const Careers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('ALL');
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const jobs = [
-    {
-      title: 'Production Manager — Sorghum Brewing',
-      location: 'Pretoria Industrial, South Africa',
-      employmentType: 'Full-time',
-      closingDate: '30 Sept 2026',
-      slug: 'production-manager-sorghum-brewing',
-    },
-    {
-      title: 'Quality Control Chemist & Microbiologist',
-      location: 'Pretoria Industrial, South Africa',
-      employmentType: 'Full-time',
-      closingDate: '15 Oct 2026',
-      slug: 'quality-control-chemist',
-    },
-    {
-      title: 'Logistics & Distribution Supervisor',
-      location: 'Gauteng Region, South Africa',
-      employmentType: 'Full-time',
-      closingDate: '28 Oct 2026',
-      slug: 'logistics-distribution-supervisor',
-    },
-    {
-      title: 'Maintenance Artisan — Brewery Mechanical',
-      location: 'Pretoria Industrial, South Africa',
-      employmentType: 'Full-time',
-      closingDate: '10 Nov 2026',
-      slug: 'maintenance-artisan-mechanical',
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await jobService.getJobs({ type: selectedType });
+        if (isMounted) {
+          setJobs(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError((err as Error).message || 'Unable to load career opportunities from server');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchJobs();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedType]);
 
   const filteredJobs = jobs.filter((j) => {
-    const matchesSearch = j.title.toLowerCase().includes(searchTerm.toLowerCase()) || j.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === 'ALL' || j.employmentType === selectedType;
-    return matchesSearch && matchesType;
+    const titleMatch = j.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const locationMatch = j.location?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    return titleMatch || locationMatch;
   });
+
+  const formatClosingDate = (dateStr?: string) => {
+    if (!dateStr) return 'Open until filled';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <Layout>
@@ -56,7 +67,7 @@ export const Careers: React.FC = () => {
         backgroundImageUrl="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1600&auto=format&fit=crop"
       />
 
-      <section className="py-16 bg-[#F7F6F2]">
+      <section className="py-16 bg-unb-sand">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <SectionHeader
@@ -76,7 +87,7 @@ export const Careers: React.FC = () => {
                 placeholder="Search job title or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-xs focus:outline-hidden focus:border-[#132B5B]"
+                className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-xs focus:outline-hidden focus:border-unb-navy"
               />
             </div>
 
@@ -86,7 +97,7 @@ export const Careers: React.FC = () => {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full md:w-auto px-3 py-2 text-xs border border-gray-300 rounded-xs focus:outline-hidden focus:border-[#132B5B] bg-white font-medium"
+                className="w-full md:w-auto px-3 py-2 text-xs border border-gray-300 rounded-xs focus:outline-hidden focus:border-unb-navy bg-white font-medium cursor-pointer"
               >
                 <option value="ALL">All Types</option>
                 <option value="Full-time">Full-time</option>
@@ -97,26 +108,40 @@ export const Careers: React.FC = () => {
 
           </div>
 
-          {/* Job Cards Listing */}
-          <div className="space-y-4">
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <JobCard
-                  key={job.slug}
-                  title={job.title}
-                  location={job.location}
-                  employmentType={job.employmentType}
-                  closingDate={job.closingDate}
-                  slug={job.slug}
-                />
-              ))
-            ) : (
-              <div className="bg-white p-12 text-center border border-gray-200 rounded-xs space-y-2">
-                <h3 className="text-base font-bold text-[#132B5B]">No openings found matching your criteria</h3>
-                <p className="text-xs text-gray-500">Try adjusting your search terms or filter selections.</p>
-              </div>
-            )}
-          </div>
+          {/* Job State Handling */}
+          {loading ? (
+            <div className="py-16 flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-8 h-8 text-unb-navy animate-spin" />
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                Loading active vacancies...
+              </p>
+            </div>
+          ) : error ? (
+            <div className="my-8 p-6 bg-red-50 border border-red-200 rounded-xs text-center space-y-2">
+              <AlertCircle className="w-6 h-6 text-red-600 mx-auto" />
+              <p className="text-xs text-red-700 font-medium">{error}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredJobs.length > 0 ? (
+                filteredJobs.map((job) => (
+                  <JobCard
+                    key={job.slug}
+                    title={job.title}
+                    location={job.location || 'Pretoria Industrial, South Africa'}
+                    employmentType={job.employmentType || 'Full-time'}
+                    closingDate={formatClosingDate(job.closingDate)}
+                    slug={job.slug}
+                  />
+                ))
+              ) : (
+                <div className="bg-white p-12 text-center border border-gray-200 rounded-xs space-y-2">
+                  <h3 className="text-base font-bold text-unb-navy">No openings found matching your criteria</h3>
+                  <p className="text-xs text-gray-500">Try adjusting your search terms or filter selections, or check back soon for upcoming vacancies.</p>
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
       </section>

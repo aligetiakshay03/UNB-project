@@ -13,6 +13,8 @@ import contactRoutes from './routes/contact.routes';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
 
+import path from 'path';
+
 // Middleware
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
@@ -20,7 +22,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Security & Parsing ───────────────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -29,6 +35,9 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ─── Static Media Uploads ─────────────────────────────────────────────────────
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req: Request, res: Response) => {

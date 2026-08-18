@@ -16,3 +16,20 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
 }
+
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"]:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+select:disabled {
+  cursor: not-allowed;
+}

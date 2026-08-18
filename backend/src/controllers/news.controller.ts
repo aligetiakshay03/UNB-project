@@ -33,8 +33,10 @@ export const getNews = async (
           slug: true,
           category: true,
           summary: true,
+          content: true,
           featuredImage: true,
           publishedAt: true,
+          createdAt: true,
         },
       }),
     ]);

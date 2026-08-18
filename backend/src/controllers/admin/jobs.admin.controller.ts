@@ -132,7 +132,10 @@ export const adminDeleteJob = async (
       return;
     }
 
-    await prisma.job.delete({ where: { id: req.params.id } });
+    await prisma.$transaction([
+      prisma.application.deleteMany({ where: { jobId: req.params.id } }),
+      prisma.job.delete({ where: { id: req.params.id } }),
+    ]);
     res.json({ data: { message: 'Job deleted' } });
   } catch (err) {
     next(err);

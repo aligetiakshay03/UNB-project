@@ -60,9 +60,8 @@ export const adminCreateProduct = async (
     const data = parseResult.data;
     const slug = generateSlug(data.name);
 
-    // [CLIENT DECISION REQUIRED] Upload req.file.buffer to cloud storage here
     const imageUrl = req.file
-      ? `[FILE_STORAGE_PLACEHOLDER]/${Date.now()}_${req.file.originalname}`
+      ? `/uploads/${req.file.filename}`
       : undefined;
 
     const product = await prisma.product.create({
@@ -109,7 +108,7 @@ export const adminUpdateProduct = async (
 
     const data = parseResult.data;
     const imageUrl = req.file
-      ? `[FILE_STORAGE_PLACEHOLDER]/${Date.now()}_${req.file.originalname}`
+      ? `/uploads/${req.file.filename}`
       : undefined;
 
     const product = await prisma.product.update({
@@ -184,3 +183,20 @@ export const adminPatchProductStatus = async (
     next(err);
   }
 };
+
+/** GET /api/admin/categories */
+export const adminGetCategories = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const categories = await prisma.category.findMany({
+      orderBy: { displayOrder: 'asc' },
+    });
+    res.json({ data: categories });
+  } catch (err) {
+    next(err);
+  }
+};
+

@@ -1,82 +1,123 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { PageHero } from '../components/sections/PageHero';
 import { Button } from '../components/ui/Button';
-import { ArrowLeft, CheckCircle2, Package } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Package, Loader2, AlertCircle } from 'lucide-react';
+import { productService } from '../services/productService';
+import { resolveImageUrl } from '../utils/imageUrl';
+import type { Product } from '../types';
 
 export const BrandDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock product detail dictionary for Phase 2 UI
-  const productData: Record<string, {
-    name: string;
-    category: string;
-    description: string;
-    fullDescription: string;
-    imageUrl: string;
-    tag: string;
-    specs: string[];
-    variants?: { name: string; description: string; imageUrl: string }[];
-  }> = {
-    'chibuku': {
-      name: 'CHIBUKU',
-      category: 'Sorghum Beverages',
-      tag: 'ORIGINAL SORGHUM BEER',
-      description: 'The original and most loved sorghum beer, brewed for the people.',
-      fullDescription: 'Chibuku is an authentic, traditional sorghum beer crafted from locally sourced grains. Known for its distinct taste, rich texture, and deep heritage, Chibuku brings communities together in celebration of authentic African brewing traditions.',
-      imageUrl: 'https://images.unsplash.com/photo-1584225064785-c62a8b43d148?q=80&w=800&auto=format&fit=crop',
-      specs: ['Brewed from quality sorghum grains', 'Traditional live culture fermentation', 'Value-driven packaging format', 'Served chilled'],
-    },
-    'chibuku-super': {
-      name: 'PREMIUM | CHIBUKU SUPER',
-      category: 'Sorghum Beverages',
-      tag: 'FLAGSHIP CARBONATED',
-      description: "UNB's flagship carbonated sorghum beer brand, celebrated for its rich taste, consistent quality and smooth finish.",
-      fullDescription: 'Chibuku Super is a premium carbonated sorghum beer that combines traditional brewing techniques with modern carbonation innovation. It offers a smooth, refreshing finish and an extended shelf life, making it the leading choice across Southern Africa.',
-      imageUrl: 'https://images.unsplash.com/photo-1584225064785-c62a8b43d148?q=80&w=800&auto=format&fit=crop',
-      specs: ['Lightly carbonated for smooth finish', 'Extended shelf life carton packaging', 'Consistent taste and premium quality', 'Best served cold'],
-    },
-    'ukhozi-mageu': {
-      name: 'UKHOZI MAGEU',
-      category: 'Non-Alcoholic Beverages',
-      tag: 'NON-ALCOHOLIC MAGEU',
-      description: 'A traditional cultured maize drink, nourishing and refreshing.',
-      fullDescription: 'Ukhozi Mageu is a classic, non-alcoholic cultured maize beverage providing everyday energy and traditional refreshment. Made from wholesome grains, it is available in popular flavor variants for the whole family to enjoy.',
-      imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=800&auto=format&fit=crop',
-      specs: ['100% Non-Alcoholic beverage', 'Rich source of daily energy', 'Available in 3 popular flavor variants', 'No artificial preservatives'],
-      variants: [
-        { name: 'Banana', description: 'Smooth and fruity', imageUrl: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=400&auto=format&fit=crop' },
-        { name: 'Cream', description: 'Rich and indulgent', imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=400&auto=format&fit=crop' },
-        { name: 'Mabele', description: 'Traditional grain goodness', imageUrl: 'https://images.unsplash.com/photo-1574096079513-d8259312b785?q=80&w=400&auto=format&fit=crop' },
-      ],
-    },
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProduct = async () => {
+      if (!slug) return;
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await productService.getProductBySlug(slug);
+        if (isMounted) {
+          setProduct(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError((err as Error).message || 'Product not found');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProduct();
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  // Approved reference image fallback helper
+  const getProductImage = (p: Product | null) => {
+    const slugMap: Record<string, string> = {
+      'chibuku-super': '/images/unb-reference/brand-chibuku.jpg',
+      'chibuku': '/images/unb-reference/brand-chibuku.jpg',
+      'lion-lager': '/images/unb-reference/brand-leopard.jpg',
+      'leopard': '/images/unb-reference/brand-leopard.jpg',
+      'ijuba': '/images/unb-reference/brand-ijuba.jpg',
+      'ukhozi-mageu': '/images/unb-reference/brand-ukhozi-mageu.jpg',
+      'sparkling-water': '/images/unb-reference/brand-ijuba.jpg',
+    };
+    const fallback = (p?.slug && slugMap[p.slug]) || '/images/unb-reference/brand-chibuku.jpg';
+    return resolveImageUrl(p?.imageUrl, fallback);
   };
 
-  const product = (slug && productData[slug]) || {
-    name: (slug || 'PRODUCT').toUpperCase().replace(/-/g, ' '),
-    category: 'Traditional Beverage',
-    tag: 'UNB BRAND',
-    description: 'A quality traditional African beverage crafted by United National Breweries.',
-    fullDescription: 'United National Breweries produces a diverse portfolio of authentic traditional African beverages crafted with quality ingredients, celebrating heritage and bringing communities together.',
-    imageUrl: 'https://images.unsplash.com/photo-1574096079513-d8259312b785?q=80&w=800&auto=format&fit=crop',
-    specs: ['Authentic African recipe', 'Quality controlled brewing', 'Accessible value packaging', 'Trusted brand heritage'],
-  };
+  const defaultSpecs = [
+    'Brewed from quality grains',
+    'Authentic African recipe',
+    'Strict quality control standards',
+    'Best served chilled',
+  ];
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-4 py-24">
+          <Loader2 className="w-10 h-10 text-unb-navy animate-spin" />
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading brand details...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+          <div className="w-14 h-14 rounded-full bg-amber-50 text-unb-amber mx-auto flex items-center justify-center">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-unb-navy">Brand or Product Not Found</h1>
+          <p className="text-sm text-gray-600 max-w-md mx-auto">
+            The requested product could not be located in our active beverage portfolio.
+          </p>
+          <div>
+            <Link to="/brands">
+              <Button variant="navy">← BACK TO BRANDS PORTFOLIO</Button>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const productImage = getProductImage(product);
+  const categoryName = product.category?.name || 'Traditional African Beverages';
+  const displayDescription = product.description && !product.description.includes('[CLIENT')
+    ? product.description
+    : (product.shortDescription && !product.shortDescription.includes('[CLIENT')
+      ? product.shortDescription
+      : 'United National Breweries produces a diverse portfolio of authentic traditional African beverages crafted with quality ingredients, celebrating heritage and bringing communities together.');
 
   return (
     <Layout>
       <PageHero
-        categoryTag={product.category}
+        categoryTag={categoryName}
         title={product.name}
-        description={product.description}
-        backgroundImageUrl={product.imageUrl}
+        description={product.shortDescription && !product.shortDescription.includes('[CLIENT') ? product.shortDescription : undefined}
+        backgroundImageUrl={productImage}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Back Link */}
         <div className="mb-8">
-          <Link to="/brands" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#132B5B] hover:text-[#D99B26] tracking-wider uppercase transition-colors">
+          <Link to="/brands" className="inline-flex items-center gap-1.5 text-xs font-bold text-unb-navy hover:text-unb-amber tracking-wider uppercase transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span>BACK TO BRANDS PORTFOLIO</span>
           </Link>
@@ -87,7 +128,7 @@ export const BrandDetail: React.FC = () => {
           {/* Main Image */}
           <div className="lg:col-span-5 bg-white border border-gray-200 rounded-xs p-8 shadow-xs flex items-center justify-center">
             <img
-              src={product.imageUrl}
+              src={productImage}
               alt={product.name}
               className="max-h-96 object-contain"
             />
@@ -96,27 +137,27 @@ export const BrandDetail: React.FC = () => {
           {/* Product Details */}
           <div className="lg:col-span-7 space-y-6">
             <div>
-              <span className="inline-block bg-[#132B5B] text-[#D99B26] text-[10px] font-extrabold tracking-widest uppercase px-3 py-1 mb-2">
-                {product.tag}
+              <span className="inline-block bg-unb-navy text-unb-amber text-[10px] font-extrabold tracking-widest uppercase px-3 py-1 mb-2">
+                {product.isFeatured ? 'FLAGSHIP BRAND' : 'UNB BRAND'}
               </span>
-              <h1 className="text-3xl font-black text-[#132B5B]">{product.name}</h1>
-              <p className="text-xs text-gray-500 font-medium mt-1">{product.category}</p>
+              <h1 className="text-3xl font-black text-unb-navy">{product.name}</h1>
+              <p className="text-xs text-gray-500 font-medium mt-1">{categoryName}</p>
             </div>
 
             <p className="text-sm text-gray-700 leading-relaxed">
-              {product.fullDescription}
+              {displayDescription}
             </p>
 
             {/* Specifications Checklist */}
             <div className="space-y-3 pt-2">
-              <h3 className="text-xs font-bold text-[#D99B26] uppercase tracking-widest flex items-center gap-1.5">
-                <Package className="w-4 h-4 text-[#132B5B]" />
+              <h3 className="text-xs font-bold text-unb-amber uppercase tracking-widest flex items-center gap-1.5">
+                <Package className="w-4 h-4 text-unb-navy" />
                 <span>PRODUCT HIGHLIGHTS</span>
               </h3>
               <ul className="space-y-2 text-xs text-gray-700">
-                {product.specs.map((spec, idx) => (
+                {defaultSpecs.map((spec, idx) => (
                   <li key={idx} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#132B5B]" />
+                    <CheckCircle2 className="w-4 h-4 text-unb-navy" />
                     <span>{spec}</span>
                   </li>
                 ))}
@@ -133,20 +174,20 @@ export const BrandDetail: React.FC = () => {
 
         </div>
 
-        {/* Variants Section (if applicable) */}
-        {product.variants && (
+        {/* Variants Section (if applicable from API) */}
+        {product.variants && product.variants.length > 0 && (
           <div className="mt-16 pt-12 border-t border-gray-200">
-            <h2 className="text-xl font-black text-[#132B5B] uppercase tracking-tight mb-6">
-              FLAVOR VARIANTS
+            <h2 className="text-xl font-black text-unb-navy uppercase tracking-tight mb-6">
+              FLAVOR & PACKAGING VARIANTS
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {product.variants.map((v, i) => (
-                <div key={i} className="bg-[#F7F6F2] p-6 border border-gray-200 rounded-xs text-center space-y-3">
+              {product.variants.map((v) => (
+                <div key={v.id} className="bg-unb-sand p-6 border border-gray-200 rounded-xs text-center space-y-3">
                   <div className="h-44 bg-white rounded-xs overflow-hidden flex items-center justify-center p-4 shadow-inner">
-                    <img src={v.imageUrl} alt={v.name} className="max-h-full object-contain" />
+                    <img src={v.imageUrl || productImage} alt={v.name} className="max-h-full object-contain" />
                   </div>
-                  <h3 className="text-sm font-black text-[#132B5B] uppercase">{v.name}</h3>
-                  <p className="text-xs text-gray-600">{v.description}</p>
+                  <h3 className="text-sm font-black text-unb-navy uppercase">{v.name}</h3>
+                  {v.description && <p className="text-xs text-gray-600">{v.description}</p>}
                 </div>
               ))}
             </div>
