@@ -1,0 +1,18 @@
+# Normalise line endings to LF in the repo for cross-platform consistency
+* text=auto eol=lf
+
+# Binary files — leave unchanged
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.zip binary
+*.gz binary

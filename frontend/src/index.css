@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-unb-navy: #132B5B;
+  --color-unb-navy-dark: #1B365D;
+  --color-unb-amber: #D99B26;
+  --color-unb-sand: #F7F6F2;
+  --color-unb-charcoal: #1E2229;
+}
+
+body {
+  font-family: 'Barlow', 'Roboto', system-ui, -apple-system, sans-serif;
+  color: var(--color-charcoal);
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}

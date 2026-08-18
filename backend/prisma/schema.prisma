@@ -1,0 +1,162 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ApplicationStatus {
+  NEW
+  REVIEWING
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(EDITOR)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Category {
+  id           String    @id @default(uuid())
+  name         String
+  slug         String    @unique
+  description  String?
+  displayOrder Int       @default(0) @map("display_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  products     Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String           @id @default(uuid())
+  categoryId       String           @map("category_id")
+  name             String
+  slug             String           @unique
+  shortDescription String?          @map("short_description")
+  description      String?
+  imageUrl         String?          @map("image_url")
+  isFeatured       Boolean          @default(false) @map("is_featured")
+  status           ContentStatus    @default(DRAFT)
+  displayOrder     Int              @default(0) @map("display_order")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  category         Category         @relation(fields: [categoryId], references: [id])
+  variants         ProductVariant[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@map("products")
+}
+
+model ProductVariant {
+  id           String   @id @default(uuid())
+  productId    String   @map("product_id")
+  name         String
+  description  String?
+  imageUrl     String?  @map("image_url")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model News {
+  id            String        @id @default(uuid())
+  title         String
+  slug          String        @unique
+  category      String?
+  summary       String?
+  content       String
+  featuredImage String?       @map("featured_image")
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?     @map("published_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([category])
+  @@map("news")
+}
+
+model Job {
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  location         String?
+  employmentType   String?       @map("employment_type")
+  description      String
+  requirements     String?
+  responsibilities String?
+  closingDate      DateTime?     @map("closing_date") @db.Date
+  status           ContentStatus @default(DRAFT)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  applications     Application[]
+
+  @@index([status])
+  @@index([closingDate])
+  @@map("jobs")
+}
+
+model Application {
+  id                String            @id @default(uuid())
+  jobId             String            @map("job_id")
+  name              String
+  email             String
+  phone             String?
+  coverMessage      String?           @map("cover_message")
+  cvUrl             String?           @map("cv_url")
+  cvFileName        String?           @map("cv_file_name")
+  cvFileSize        Int?              @map("cv_file_size")
+  cvFileType        String?           @map("cv_file_type")
+  applicationStatus ApplicationStatus @default(NEW) @map("application_status")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  job               Job               @relation(fields: [jobId], references: [id])
+
+  @@index([jobId])
+  @@index([applicationStatus])
+  @@index([createdAt])
+  @@map("applications")
+}
+
+model Enquiry {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  enquiryType String   @map("enquiry_type")
+  message     String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([enquiryType])
+  @@index([createdAt])
+  @@map("enquiries")
+}
