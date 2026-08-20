@@ -8,6 +8,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { newsService } from '../services/newsService';
 import { resolveImageUrl } from '../utils/imageUrl';
 import type { News as NewsItem } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const News: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -65,6 +66,11 @@ export const News: React.FC = () => {
   return (
     <ErrorBoundary>
       <Layout>
+        <SEOHead
+          title="News & Media | United National Breweries"
+          description="Read the latest news, community initiatives, brewing achievements, and company announcements from United National Breweries."
+          canonicalUrl="https://unb.co.za/news"
+        />
         <PageHero
           categoryTag="NEWS & MEDIA"
           title="Latest News & Press Releases"

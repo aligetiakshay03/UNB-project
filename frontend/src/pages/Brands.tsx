@@ -8,6 +8,7 @@ import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { productService } from '../services/productService';
 import { resolveImageUrl } from '../utils/imageUrl';
 import type { Product } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Brands: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,6 +59,11 @@ export const Brands: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title="Our Brands | Traditional African Sorghum Beer & Beverages"
+        description="Explore UNB's distinguished portfolio of traditional sorghum beers, premium maize brews, lagers, and traditional mageu beverages including Chibuku, Ijuba, and Leopard."
+        canonicalUrl="https://unb.co.za/brands"
+      />
       {/* HERO SECTION matching PDF Page 3 */}
       <PageHero
         categoryTag="OUR BRANDS"

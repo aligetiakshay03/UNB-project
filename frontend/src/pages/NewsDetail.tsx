@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, FileText, Share2, Loader2, AlertCircle } from 'luc
 import { newsService } from '../services/newsService';
 import { resolveImageUrl } from '../utils/imageUrl';
 import type { News } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const NewsDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -95,6 +96,13 @@ export const NewsDetail: React.FC = () => {
   return (
     <ErrorBoundary>
       <Layout>
+        <SEOHead
+          title={`${article.title || 'News Article'} | United National Breweries`}
+          description={article.summary ? article.summary.substring(0, 160) : (article.content ? article.content.substring(0, 160) : 'Read this article from United National Breweries.')}
+          canonicalUrl={`https://unb.co.za/news/${article.slug}`}
+          ogType="article"
+          ogImage={articleImage}
+        />
         <PageHero
           categoryTag={article.category || 'NEWS & MEDIA'}
           title={article.title || 'News Article'}

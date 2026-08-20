@@ -4,6 +4,7 @@ import { PageHero } from '../components/sections/PageHero';
 import { SectionHeader } from '../components/sections/SectionHeader';
 import { ProductCard } from '../components/cards/ProductCard';
 import { Button } from '../components/ui/Button';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Home: React.FC = () => {
   // Sample data matching PDF Page 1
@@ -28,7 +29,7 @@ export const Home: React.FC = () => {
     },
     {
       name: 'UKHOZI MAGEU',
-      description: 'A traditional cultured maize drink, nourishing and refreshing.',
+      description: 'Traditional non-alcoholic fermented beverage for daily refreshment.',
       imageUrl: '/images/unb-reference/brand-ukhozi-mageu.jpg',
       slug: 'ukhozi-mageu',
     },
@@ -55,6 +56,11 @@ export const Home: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title="United National Breweries | Traditional African Beer & Beverages"
+        description="South Africa's premier manufacturer of traditional sorghum beer and non-alcoholic beverages since 1989. Discover our heritage brands including Chibuku, Ijuba, and Leopard."
+        canonicalUrl="https://unb.co.za/"
+      />
       {/* 1. HERO BANNER matching PDF Page 1 */}
       <PageHero
         title="Celebrating African Brewing Heritage"

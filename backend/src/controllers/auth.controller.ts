@@ -53,6 +53,15 @@ export const login = async (
       signOptions
     );
 
+    // Set hardened httpOnly cookie
+    res.cookie('admin_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+      path: '/',
+    });
+
     res.json({
       data: {
         token,
@@ -66,11 +75,16 @@ export const login = async (
 
 /**
  * POST /api/auth/logout
- * Stateless JWT — client discards token. Server-side blacklisting is an
- * implementation decision to be resolved if required.
+ * Clears the httpOnly admin_token cookie and returns confirmation.
  */
-export const logout = (req: Request, res: Response): void => {
-  res.json({ data: { message: 'Logged out' } });
+export const logout = (_req: Request, res: Response): void => {
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
+  res.json({ data: { message: 'Logged out successfully' } });
 };
 
 /**

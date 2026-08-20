@@ -56,24 +56,27 @@ export const notFoundHandler = (req: Request, res: Response): void => {
 // Rate limiters
 export const contactRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
-  message: { error: { message: 'Too many requests. Please try again later.' } },
+  max: 10,
+  statusCode: 429,
+  message: { error: { message: 'Too many contact submissions. Please try again in 15 minutes.', code: 'RATE_LIMIT_EXCEEDED' } },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 export const applicationRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 3,
-  message: { error: { message: 'Too many applications. Please try again later.' } },
+  max: 10,
+  statusCode: 429,
+  message: { error: { message: 'Too many application submissions. Please try again in 15 minutes.', code: 'RATE_LIMIT_EXCEEDED' } },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 export const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { error: { message: 'Too many login attempts. Please try again later.' } },
+  max: 10,
+  statusCode: 429,
+  message: { error: { message: 'Too many login attempts. Please try again in 15 minutes.', code: 'RATE_LIMIT_EXCEEDED' } },
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, Package, Loader2, AlertCircle } from 'lucide-r
 import { productService } from '../services/productService';
 import { resolveImageUrl } from '../utils/imageUrl';
 import type { Product } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const BrandDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -106,6 +107,12 @@ export const BrandDetail: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title={`${product.name} | United National Breweries`}
+        description={displayDescription.substring(0, 160)}
+        canonicalUrl={`https://unb.co.za/brands/${product.slug}`}
+        ogImage={productImage}
+      />
       <PageHero
         categoryTag={categoryName}
         title={product.name}

@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, Briefcase, Calendar, CheckCircle2, Upload, X, AlertC
 import { jobService } from '../services/jobService';
 import { applicationService } from '../services/applicationService';
 import type { Job } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const JobDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -169,6 +170,11 @@ export const JobDetail: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title={`${job.title} (${job.location}) | Careers at United National Breweries`}
+        description={job.description ? job.description.substring(0, 160) : `Apply for the ${job.title} role at United National Breweries in ${job.location}.`}
+        canonicalUrl={`https://unb.co.za/careers/${job.slug}`}
+      />
       <PageHero
         categoryTag="CAREER OPPORTUNITY"
         title={job.title}
@@ -276,10 +282,12 @@ export const JobDetail: React.FC = () => {
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name *</label>
+                  <label htmlFor="apply-name" className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name *</label>
                   <input
+                    id="apply-name"
                     type="text"
                     required
+                    aria-required="true"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Thabo Mokoena"
@@ -289,10 +297,12 @@ export const JobDetail: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
+                    <label htmlFor="apply-email" className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
                     <input
+                      id="apply-email"
                       type="email"
                       required
+                      aria-required="true"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="name@example.co.za"
@@ -301,8 +311,9 @@ export const JobDetail: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+                    <label htmlFor="apply-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
                     <input
+                      id="apply-phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -313,8 +324,9 @@ export const JobDetail: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Cover Message</label>
+                  <label htmlFor="apply-message" className="block text-xs font-bold text-gray-700 uppercase mb-1">Cover Message</label>
                   <textarea
+                    id="apply-message"
                     rows={3}
                     value={formData.coverMessage}
                     onChange={(e) => setFormData({ ...formData, coverMessage: e.target.value })}

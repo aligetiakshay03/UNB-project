@@ -6,9 +6,7 @@ export const contactSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
   email: z.string().email('Must be a valid email'),
   phone: z.string().max(50).optional(),
-  enquiryType: z.enum(['General', 'Trade', 'Media', 'Other'], {
-    errorMap: () => ({ message: 'enquiryType must be one of: General, Trade, Media, Other' }),
-  }),
+  enquiryType: z.string().min(1, 'Enquiry type is required').max(100),
   message: z.string().min(10, 'Message must be at least 10 characters').max(2000),
 });
 

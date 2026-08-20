@@ -20,6 +20,20 @@ async function main() {
   });
   console.log('[SEED] Admin user:', adminUser.email);
 
+  // ─── Editor User ────────────────────────────────────────────────────────────
+  const editorPasswordHash = await bcrypt.hash('editor123!', 12);
+  const editorUser = await prisma.user.upsert({
+    where: { email: 'editor@unb.co.za' },
+    update: {},
+    create: {
+      name: 'UNB Editor',
+      email: 'editor@unb.co.za',
+      passwordHash: editorPasswordHash,
+      role: 'EDITOR',
+    },
+  });
+  console.log('[SEED] Editor user:', editorUser.email);
+
   // ─── Product Categories ──────────────────────────────────────────────────────
   const sorghumCat = await prisma.category.upsert({
     where: { slug: 'sorghum-beverages' },

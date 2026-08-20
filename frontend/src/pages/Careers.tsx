@@ -6,6 +6,7 @@ import { JobCard } from '../components/cards/JobCard';
 import { Search, Loader2, AlertCircle } from 'lucide-react';
 import { jobService } from '../services/jobService';
 import type { Job } from '../types';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Careers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +60,11 @@ export const Careers: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title="Careers | United National Breweries"
+        description="Explore career opportunities in brewing, engineering, distribution, and leadership at United National Breweries across South Africa."
+        canonicalUrl="https://unb.co.za/careers"
+      />
       {/* HERO BANNER */}
       <PageHero
         categoryTag="CAREERS AT UNB"

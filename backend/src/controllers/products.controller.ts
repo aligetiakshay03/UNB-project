@@ -57,7 +57,7 @@ export const getProductBySlug = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const product = await prisma.product.findUnique({
+    const product = await prisma.product.findFirst({
       where: { slug: req.params.slug, status: 'PUBLISHED' },
       include: {
         category: { select: { id: true, name: true, slug: true } },

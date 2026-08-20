@@ -1,10 +1,16 @@
 import React from 'react';
 import { Layout } from '../components/layout/Layout';
 import { PageHero } from '../components/sections/PageHero';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Sustainability: React.FC = () => {
   return (
     <Layout>
+      <SEOHead
+        title="Sustainability | United National Breweries"
+        description="Discover UNB's environmental stewardship, sustainable brewing commitments, and community upliftment initiatives across South Africa."
+        canonicalUrl="https://unb.co.za/sustainability"
+      />
       <PageHero
         categoryTag="SUSTAINABILITY"
         title="Brewing a Better Tomorrow"

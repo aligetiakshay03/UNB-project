@@ -4,6 +4,7 @@ import { PageHero } from '../components/sections/PageHero';
 import { SectionHeader } from '../components/sections/SectionHeader';
 import { ValueCard } from '../components/cards/ValueCard';
 import { Eye, Target } from 'lucide-react';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const About: React.FC = () => {
   const values = [
@@ -41,6 +42,11 @@ export const About: React.FC = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title="About Us | United National Breweries"
+        description="Learn about United National Breweries (UNB), our rich heritage in crafting traditional sorghum beer and non-alcoholic beverages, and our enduring community values."
+        canonicalUrl="https://unb.co.za/about"
+      />
       {/* 1. HERO SECTION matching PDF Page 2 */}
       <PageHero
         categoryTag="ABOUT US"

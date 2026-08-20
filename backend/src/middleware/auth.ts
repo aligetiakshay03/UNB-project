@@ -15,14 +15,32 @@ export const authenticate = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const authHeader = req.headers.authorization;
+  let token: string | undefined;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: { message: 'Missing or invalid authorization header' } });
-    return;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  } else if (req.cookies && req.cookies.admin_token) {
+    token = req.cookies.admin_token;
+
+    // CSRF Protection for cookie-based state-changing requests
+    const mutatingMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+    if (mutatingMethods.includes(req.method.toUpperCase())) {
+      const origin = req.headers.origin || req.headers.referer;
+      const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+      
+      if (origin && !origin.startsWith(allowedOrigin) && !origin.includes('localhost')) {
+        console.warn(`[SECURITY CSRF] Blocked cross-origin mutating request from: ${origin}`);
+        res.status(403).json({ error: { message: 'Cross-origin request blocked (CSRF validation)' } });
+        return;
+      }
+    }
   }
 
-  const token = authHeader.slice(7);
+  if (!token) {
+    res.status(401).json({ error: { message: 'Authentication required' } });
+    return;
+  }
 
   try {
     const secret = process.env.JWT_SECRET;

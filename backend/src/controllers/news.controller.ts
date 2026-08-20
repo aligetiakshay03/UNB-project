@@ -60,7 +60,7 @@ export const getNewsBySlug = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const article = await prisma.news.findUnique({
+    const article = await prisma.news.findFirst({
       where: { slug: req.params.slug, status: 'PUBLISHED' },
     });
 

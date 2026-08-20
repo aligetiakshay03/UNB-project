@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../lib/prisma';
 import { applicationStatusSchema, paginationSchema } from '../../validators/schemas';
+import { storageService } from '../../services/storage/storage.service';
 
 /** GET /api/admin/applications */
 export const adminListApplications = async (
@@ -66,8 +67,8 @@ export const adminGetApplication = async (
 
 /**
  * GET /api/admin/applications/:id/cv
- * [IMPLEMENTATION DECISION REQUIRED] In production, fetch CV from cloud storage
- * and stream it to the client. This placeholder returns the stored URL.
+ * Securely streams private candidate CV or provides signed URL.
+ * Requires authenticated admin/editor credentials.
  */
 export const adminGetApplicationCV = async (
   req: Request,
@@ -90,15 +91,45 @@ export const adminGetApplicationCV = async (
       return;
     }
 
-    // [CLIENT DECISION REQUIRED] Replace with actual signed-URL generation / proxied stream
-    res.json({
-      data: {
-        cvUrl: application.cvUrl,
-        cvFileName: application.cvFileName,
-        cvFileType: application.cvFileType,
-        note: 'Direct signed-URL generation requires cloud storage integration',
-      },
-    });
+    const storageKey = application.cvUrl;
+    const download = req.query.download === 'true';
+
+    // 1. Try streaming from local-private storage
+    const fileResult = await storageService.getPrivateFileStream(storageKey);
+    if (fileResult) {
+      const disposition = download ? 'attachment' : 'inline';
+      res.setHeader('Content-Type', fileResult.mimeType || 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `${disposition}; filename="${application.cvFileName || fileResult.fileName}"`
+      );
+      if (fileResult.fileSize) {
+        res.setHeader('Content-Length', fileResult.fileSize);
+      }
+      fileResult.stream.pipe(res);
+      return;
+    }
+
+    // 2. Try generating signed URL for cloud storage (S3 / Supabase)
+    const signedUrl = await storageService.getSignedUrl(storageKey, 900);
+    if (signedUrl) {
+      if (download) {
+        res.redirect(signedUrl);
+        return;
+      }
+      res.json({
+        data: {
+          storageKey,
+          fileName: application.cvFileName,
+          mimeType: application.cvFileType,
+          signedUrl,
+          expiresIn: 900,
+        },
+      });
+      return;
+    }
+
+    res.status(404).json({ error: { message: 'CV file not found in storage' } });
   } catch (err) {
     next(err);
   }

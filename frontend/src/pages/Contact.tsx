@@ -5,6 +5,7 @@ import { SectionHeader } from '../components/sections/SectionHeader';
 import { Button } from '../components/ui/Button';
 import { Mail, Phone, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
 import { contactService } from '../services/contactService';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -53,6 +54,11 @@ export const Contact: React.FC = () => {
 
   return (
     <Layout showCTABanner={false}>
+      <SEOHead
+        title="Contact Us | United National Breweries"
+        description="Get in touch with United National Breweries for general enquiries, distribution partnerships, trade opportunities, or feedback."
+        canonicalUrl="https://unb.co.za/contact"
+      />
       {/* HERO SECTION */}
       <PageHero
         categoryTag="CONTACT US"
@@ -143,9 +149,12 @@ export const Contact: React.FC = () => {
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name *</label>
+                    <label htmlFor="contact-name" className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name *</label>
                     <input
+                      id="contact-name"
                       type="text"
+                      required
+                      aria-required="true"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. Sipho Ndlovu"
@@ -158,9 +167,12 @@ export const Contact: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
+                      <label htmlFor="contact-email" className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
                       <input
+                        id="contact-email"
                         type="email"
+                        required
+                        aria-required="true"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="name@example.co.za"
@@ -172,8 +184,9 @@ export const Contact: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+                      <label htmlFor="contact-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
                       <input
+                        id="contact-phone"
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -184,8 +197,11 @@ export const Contact: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Enquiry Type *</label>
+                    <label htmlFor="contact-type" className="block text-xs font-bold text-gray-700 uppercase mb-1">Enquiry Type *</label>
                     <select
+                      id="contact-type"
+                      required
+                      aria-required="true"
                       value={formData.enquiryType}
                       onChange={(e) => setFormData({ ...formData, enquiryType: e.target.value })}
                       className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xs focus:outline-hidden focus:border-unb-navy bg-white font-medium cursor-pointer"
@@ -199,9 +215,12 @@ export const Contact: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Message *</label>
+                    <label htmlFor="contact-message" className="block text-xs font-bold text-gray-700 uppercase mb-1">Message *</label>
                     <textarea
+                      id="contact-message"
                       rows={5}
+                      required
+                      aria-required="true"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder="Write your message or enquiry details here..."
