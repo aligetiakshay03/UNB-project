@@ -1,12 +1,13 @@
-import pg from 'pg';
+// Required for Supabase connection pooler SSL with self-signed cert chain
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-const connectionString = process.env.DATABASE_URL;
-
-const pool = new pg.Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false },
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
 });
 
 const adapter = new PrismaPg(pool);
